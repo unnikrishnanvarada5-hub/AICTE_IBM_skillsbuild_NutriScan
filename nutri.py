@@ -232,12 +232,15 @@ print('✅ All packages installed!')
 
 #print("✅ App file written: nutriscan_app.py")
 
-from google.colab import userdata
 
-# Safely load your credentials from Colab Secrets
-GROQ_API_KEY = userdata.get('GROQ_API_KEY')
-HF_TOKEN     = userdata.get('HF_TOKEN')
-NGROK_TOKEN  = userdata.get('NGROK_TOKEN')
+
+import streamlit as st
+
+# Replace your old userdata.get() lines with these:
+GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
+HF_TOKEN = st.secrets["HF_TOKEN"]
+
+
 
 import base64 as _b64
 
