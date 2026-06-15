@@ -254,58 +254,6 @@ with open("nutriscan_app.py", "w") as f:
     f.write(_code)
 
 print("✅ nutriscan_app.py written!")
-print(f"   {len(_code.splitlines())} lines | keys injected ✓")
 
-import subprocess, time
-from pyngrok import ngrok, conf
 
-conf.get_default().auth_token = NGROK_TOKEN
 
-# ── Step 1: Kill all local processes ──────────────────────────
-subprocess.run(['pkill', '-f', 'streamlit'], capture_output=True)
-subprocess.run(['pkill', '-f', 'ngrok'],     capture_output=True)
-time.sleep(3)
-
-# ── Step 2: Kill ngrok via pyngrok (closes local agent) ───────
-ngrok.kill()
-time.sleep(3)
-
-# ── Step 3: Disconnect any tunnels the agent still knows about ─
-try:
-    for t in ngrok.get_tunnels():
-        ngrok.disconnect(t.public_url)
-        print(f"  Closed tunnel: {t.public_url}")
-except Exception as e:
-    print(f"  (No open tunnels via pyngrok: {e})")
-
-time.sleep(2)
-
-# ── Step 4: Start Streamlit ───────────────────────────────────
-proc = subprocess.Popen(
-    ['streamlit', 'run', 'nutriscan_app.py',
-     '--server.port=8501',
-     '--server.headless=true',
-     '--server.enableCORS=false',
-     '--server.enableXsrfProtection=false'],
-    stdout=subprocess.DEVNULL,
-    stderr=subprocess.DEVNULL
-)
-print("⏳ Waiting for Streamlit to boot...")
-time.sleep(7)
-
-# ── Step 5: Open fresh ngrok tunnel ──────────────────────────
-try:
-    tunnel = ngrok.connect(8501, bind_tls=True)
-    print("\n🚀 App is LIVE:")
-    print(tunnel.public_url)
-    print("\nOpen the URL above — no login needed!\n")
-except Exception as e:
-    print("\n")
-    # Pulls the overlapping URL from the error message and prints it on its own line
-    if "https://" in str(e):
-        url = str(e).split("'")[1]
-        print(url)
-    else:
-        print("Unknown Ngrok URL")
-    print(f"\nDetails:\n{e}")
-    print("\n💡 Manual fix:")
